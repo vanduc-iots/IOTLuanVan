@@ -251,11 +251,8 @@ if (voiceBtn && voiceRecognition.isSupported) {
             
             if (transcript && !voiceAutoSubmitting) {
                 prompt.value = transcript;
-                sendMessageBtn.classList.add("show-send-btn");
                 voiceAutoSubmitting = true;
-                setTimeout(() => {
-                    document.getElementById("send-message").click();
-                }, 300);
+                setTimeout(() => submitVoiceMessage(), 200);
             }
         } else {
             // Start recording
@@ -286,9 +283,7 @@ if (voiceBtn && voiceRecognition.isSupported) {
 
         if (result.isFinal && prompt.value && !voiceAutoSubmitting) {
             voiceAutoSubmitting = true;
-            setTimeout(() => {
-                submitVoiceMessage();
-            }, 300);
+            setTimeout(() => submitVoiceMessage(), 200);
         }
     };
     
@@ -298,7 +293,7 @@ if (voiceBtn && voiceRecognition.isSupported) {
 
         if (prompt.value && !voiceAutoSubmitting) {
             voiceAutoSubmitting = true;
-            submitVoiceMessage();
+            setTimeout(() => submitVoiceMessage(), 200);
         }
     };
     
