@@ -22,7 +22,19 @@ const prompt = document.getElementById("prompt-text");
 const voiceResponseToggle = document.getElementById("voice-response-toggle");
 const voiceResponseStatus = document.getElementById("voice-response-status");
 const isSpeechSupported = typeof window !== 'undefined' && 'speechSynthesis' in window;
+const speechSynth = isSpeechSupported ? window.speechSynthesis : null;
 let voiceResponseEnabled = isSpeechSupported && (localStorage.getItem('voiceResponseEnabled') !== 'false');
+let speechVoices = [];
+
+function loadSpeechVoices() {
+    if (!speechSynth) return;
+    speechVoices = speechSynth.getVoices().filter(v => v.lang.toLowerCase().startsWith('vi') || v.lang.toLowerCase().startsWith('en'));
+}
+
+function selectSpeechVoice() {
+    if (!speechVoices.length) return null;
+    return speechVoices.find(v => v.lang.toLowerCase().startsWith('vi')) || speechVoices[0];
+}
 
 function updateVoiceResponseToggleUI() {
     if (!voiceResponseToggle) return;
@@ -34,19 +46,26 @@ function updateVoiceResponseToggleUI() {
 }
 
 function speakText(text) {
-    if (!isSpeechSupported || !voiceResponseEnabled || !text) return;
+    if (!speechSynth || !voiceResponseEnabled || !text) return;
     const message = text
         .replace(/<[^>]*>/g, '')
         .replace(/!\[[^\]]*\]\([^\)]*\)/g, '')
         .replace(/\s+/g, ' ')
         .trim();
     if (!message) return;
-    window.speechSynthesis.cancel();
+    speechSynth.cancel();
     const utterance = new SpeechSynthesisUtterance(message);
     utterance.lang = 'vi-VN';
     utterance.rate = 1;
     utterance.pitch = 1;
-    window.speechSynthesis.speak(utterance);
+    const voice = selectSpeechVoice();
+    if (voice) utterance.voice = voice;
+    speechSynth.speak(utterance);
+}
+
+if (speechSynth) {
+    loadSpeechVoices();
+    speechSynth.onvoiceschanged = loadSpeechVoices;
 }
 
 function getLastBotResponseText() {
