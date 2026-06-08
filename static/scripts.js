@@ -23,6 +23,9 @@ const voiceResponseToggle = document.getElementById("voice-response-toggle");
 const voiceResponseStatus = document.getElementById("voice-response-status");
 const isSpeechSupported = typeof window !== 'undefined' && 'speechSynthesis' in window;
 const speechSynth = isSpeechSupported ? window.speechSynthesis : null;
+// Configuration flag: set to true to allow server-side TTS fallback (may incur OpenAI costs)
+// Change to `true` only if you accept server API usage charges.
+const USE_SERVER_TTS = false;
 let voiceResponseEnabled = isSpeechSupported && (localStorage.getItem('voiceResponseEnabled') !== 'false');
 let speechVoices = [];
 let hasVietnameseVoice = false;
@@ -77,6 +80,10 @@ async function speakText(text) {
 }
 
 async function speakTextFallback(text) {
+    if (!USE_SERVER_TTS) {
+        console.warn('[speech] server TTS disabled by configuration; skipping fallback');
+        return;
+    }
     try {
         const response = await fetch('/tts', {
             method: 'POST',
