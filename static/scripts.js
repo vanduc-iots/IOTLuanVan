@@ -326,7 +326,6 @@ if (voiceBtn && voiceRecognition.isSupported) {
             }
         } else {
             // Start recording
-            voiceAutoSubmitting = false;
             voiceRecognition.start();
             updateVoiceBtnUI(true);
         }
