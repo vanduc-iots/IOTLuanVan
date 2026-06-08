@@ -261,12 +261,12 @@ if (voiceBtn && voiceRecognition.isSupported) {
         if (voiceRecognition.isListening) {
             // Stop recording manually if user clicks again
             const transcript = voiceRecognition.stop();
+            console.log('[voice] clicked to stop - stop() returned:', transcript);
             updateVoiceBtnUI(false);
             
-            if (transcript && !voiceAutoSubmitting) {
+            if (transcript) {
+                console.log('[voice] applying transcript from stop():', transcript);
                 prompt.value = transcript;
-                voiceAutoSubmitting = true;
-                setTimeout(() => submitVoiceMessage(), 200);
             }
         } else {
             // Start recording
@@ -284,6 +284,7 @@ if (voiceBtn && voiceRecognition.isSupported) {
     };
     
     voiceRecognition.onResult = (result) => {
+        console.log('[voice] onResult callback:', result);
         // Update prompt text with interim results
         if (result.final) {
             prompt.value = result.final;
