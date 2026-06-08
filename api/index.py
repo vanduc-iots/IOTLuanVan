@@ -1,8 +1,12 @@
+import base64
 from flask import Flask, request, jsonify, render_template, redirect
 from app import generate_Content
 from app.services.call_esp8266 import light_control, get_sensor_data, get_status as get_esp_status
 import logging
 import os
+import openai
+
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 
 app = Flask(__name__)
 app.logger.setLevel(logging.INFO)
@@ -25,6 +29,33 @@ def esp_sensor():
         "humidity": sensor.get("humidity"),
         "message": sensor.get("content")
     })
+
+@app.route("/tts", methods=["POST"])
+def ttsController():
+    data = request.get_json(silent=True) or {}
+    text = data.get("text", "").strip()
+    if not text:
+        return jsonify({"error": "Text is required"}), 400
+
+    if not OPENAI_API_KEY:
+        return jsonify({"error": "OPENAI_API_KEY is not set"}), 500
+
+    try:
+        client = openai.OpenAI(api_key=OPENAI_API_KEY)
+        response = client.audio.speech.create(
+            model="gpt-4o-mini-tts",
+            voice="alloy",
+            response_format="mp3",
+            input=text
+        )
+        audio_bytes = response
+        if hasattr(response, 'read'):
+            audio_bytes = response.read()
+        audio_base64 = base64.b64encode(audio_bytes).decode('utf-8')
+        return jsonify({"audio": audio_base64})
+    except Exception as e:
+        app.logger.exception("TTS generation failed")
+        return jsonify({"error": str(e)}), 500
 
 @app.route("/bot", methods=["POST"])
 def botController():
