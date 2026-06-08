@@ -1,0 +1,27 @@
+{
+    "light_control": {
+        "name": "light_control",
+        "description": "Tắt/Mở đèn theo yêu cầu dữ liệu đầu vào nếu có yêu cầu khớp. Có thể chỉ định đèn 1, đèn 2, đèn 3, đèn 4, hoặc tất cả (all). Nếu không chỉ định, mặc định là all.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string",
+                    "description": "Đây là trạng thái đèn mà đầu vào yêu cầu (chỉ ràng buộc trong ON hay OFF), nếu là dữ liệu khác thì hãy truyền vào hàm là OFF"
+                },
+                "led": {
+                    "type": "string",
+                    "description": "Số đèn cần điều khiển (1, 2, 3, 4, hoặc all). Nếu không chỉ định hoặc nói chung chung như 'đèn', mặc định là all."
+                }
+            }
+        }
+    },
+    "get_sensor_data": {
+        "name": "get_sensor_data",
+        "description": "Lấy dữ liệu cảm biến nhiệt độ và độ ẩm từ ESP32. Sử dụng khi người dùng hỏi về nhiệt độ, độ ẩm, hoặc điều kiện thời tiết.",
+        "parameters": {
+            "type": "object",
+            "properties": {}
+        }
+    }
+}

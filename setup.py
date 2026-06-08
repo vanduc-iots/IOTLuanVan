@@ -1,0 +1,10 @@
+import os
+
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+
+EMAIL_ACCOUNT = os.getenv("EMAIL_ACCOUNT", "YOUR EMAIL ACCOUNT (example@gmail.com)")
+EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD", "YOUR PASSWORD APPLICATION")
+
+QR_CODE_API_KEYS = [
+    os.getenv("QR_CODE_API_KEY", "YOUR API KEY - QR GENERATE")
+]

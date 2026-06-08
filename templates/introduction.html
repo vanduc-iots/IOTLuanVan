@@ -1,0 +1,186 @@
+{% extends "layout.html" %}
+
+{% block title %}Thao tác{% endblock %}
+
+{% block nav_items %}
+<li class="nav-item">
+    <a class="nav-link p-2" href="/">Hộp chat</a>
+</li>
+<li class="nav-item">
+    <a class="nav-link p-2 active" href="/introduction">Bảng điều khiển</a>
+</li>
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+    <div class="p-1 border-bottom">
+        <div class="row gx-1">
+            <div class="col-6">
+                <div class="border rounded-3 p-2">
+                    <div class="fs-6 text-secondary">Nhiệt độ</div>
+                    <div class="fs-4 fw-bold" id="esp-temp">-- °C</div>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="border rounded-3 p-2">
+                    <div class="fs-6 text-secondary">Độ ẩm</div>
+                    <div class="fs-4 fw-bold" id="esp-hum">-- %</div>
+                </div>
+            </div>
+        </div>
+        <div class="text-muted small" id="esp-status">Đang tải dữ liệu...</div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Điều khiển đèn</h5>
+                    <br>
+                    <button id="led1-btn" class="btn btn-danger m-2" onclick="toggleLed(1)">
+                        Đèn 1
+                    </button>
+
+                    <button id="led2-btn" class="btn btn-danger m-2" onclick="toggleLed(2)">
+                        Đèn 2
+                    </button>
+
+                    <button id="led3-btn" class="btn btn-danger m-2" onclick="toggleLed(3)">
+                        Đèn 3
+                    </button>
+
+                    <button id="led4-btn" class="btn btn-danger m-2" onclick="toggleLed(4)">
+                        Đèn 4
+                    </button>
+                    <br>
+                    <button class="btn btn-success m-2" onclick="controlAll('on')">Mở tất cả đèn</button>
+                    <button class="btn btn-danger m-2" onclick="controlAll('off')">Tắt tất cả đèn</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    function updateStatus() {
+
+        fetch('/get_status')
+            .then(response => response.json())
+            .then(data => {
+
+                const led1Btn = document.getElementById('led1-btn');
+                const led2Btn = document.getElementById('led2-btn');
+                const led3Btn = document.getElementById('led3-btn');
+                const led4Btn = document.getElementById('led4-btn');
+
+                // ===== LED1 =====
+                if (data.led1 === "ON") {
+                    led1Btn.classList.remove('btn-danger');
+                    led1Btn.classList.add('btn-success');
+                    led1Btn.innerHTML = '🟢 Đèn 1';
+                } else {
+                    led1Btn.classList.remove('btn-success');
+                    led1Btn.classList.add('btn-danger');
+                    led1Btn.innerHTML = '🔴 Đèn 1';
+                }
+
+                // ===== LED2 =====
+                if (data.led2 === "ON") {
+                    led2Btn.classList.remove('btn-danger');
+                    led2Btn.classList.add('btn-success');
+                    led2Btn.innerHTML = '🟢 Đèn 2';
+                } else {
+                    led2Btn.classList.remove('btn-success');
+                    led2Btn.classList.add('btn-danger');
+                    led2Btn.innerHTML = '🔴 Đèn 2';
+                }
+
+                // ===== LED3 =====
+                if (data.led3 === "ON") {
+                    led3Btn.classList.remove('btn-danger');
+                    led3Btn.classList.add('btn-success');
+                    led3Btn.innerHTML = '🟢 Đèn 3';
+                } else {
+                    led3Btn.classList.remove('btn-success');
+                    led3Btn.classList.add('btn-danger');
+                    led3Btn.innerHTML = '🔴 Đèn 3';
+                }
+
+                // ===== LED4 =====
+                if (data.led4 === "ON") {
+                    led4Btn.classList.remove('btn-danger');
+                    led4Btn.classList.add('btn-success');
+                    led4Btn.innerHTML = '🟢 Đèn 4';
+                } else {
+                    led4Btn.classList.remove('btn-success');
+                    led4Btn.classList.add('btn-danger');
+                    led4Btn.innerHTML = '🔴 Đèn 4';
+                }
+            })
+            .catch(error => {
+                console.error(error);
+            });
+    }
+
+    function toggleLed(led) {
+        const btnId = `led${led}-btn`;
+        const btn = document.getElementById(btnId);
+        
+        // Optimistic UI update - thay đổi ngay lập tức
+        const isCurrentlyOn = btn.classList.contains('btn-success');
+        if (isCurrentlyOn) {
+            btn.classList.remove('btn-success');
+            btn.classList.add('btn-danger');
+            btn.innerHTML = '🔴 Đèn ' + led;
+        } else {
+            btn.classList.remove('btn-danger');
+            btn.classList.add('btn-success');
+            btn.innerHTML = '🟢 Đèn ' + led;
+        }
+
+        // Gửi request lên server (không cần chờ)
+        fetch(`/toggle_led${led}`, {
+            method: 'POST'
+        })
+            .then(response => response.json())
+            .then(() => {
+                updateStatus();
+                
+            })
+            .catch(error => {
+                console.error(error);
+                updateStatus();
+                
+            });
+    }
+
+    function controlAll(action) {
+        fetch(`/control_all?action=${action}`, {
+            method: 'POST'
+        })
+            .then(response => response.json())
+            .then(() => {
+                updateStatus();
+                
+            })
+            .catch(error => {
+                console.error(error);
+                updateStatus();
+                
+            });
+    }
+
+    
+
+    // Load status on page load
+    window.onload = function() {
+        updateStatus();
+        
+    };
+</script>
+{% endblock %}

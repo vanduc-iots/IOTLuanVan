@@ -1,0 +1,9 @@
+version: '3.7'
+
+services:
+  ahihi123-chatbot:
+    image: VHN:v1
+    ports:
+      - 80:8080
+    command: python main.py
+    restart: unless-stopped

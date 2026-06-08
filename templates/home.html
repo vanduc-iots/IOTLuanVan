@@ -1,0 +1,92 @@
+{% extends "layout.html" %}
+
+{% block title %}ChatBot{% endblock %}
+
+{% block nav_items %}
+
+
+<li class="nav-item">
+    <a class="nav-link p-2 active" href="/">Hộp chat</a>
+</li>
+<li class="nav-item">
+    <a class="nav-link p-2" href="/introduction">Bảng điều khiển</a>
+</li>
+{% endblock %}
+
+{% block content %}
+
+
+<div class="card mx-auto" style="margin-bottom: 30px; max-width: 60em;">
+    <div class="card-header">
+        <h3>Chat</h3>
+    </div>
+
+    <div class="card-body outline" id="chat-box" style="max-height: 360px; overflow-y: auto;"></div>
+</div>
+
+<form id="form" class="fixed-bottom mx-auto px-1 pb-1" style="background-color: var(--bs-body-bg);">
+    <div class="bd-input-compose align-items-center p-1 container-sm">
+        <div class="userAttchment mx-2 d-none" id="user-attchment">
+            <span class="position-relative"
+                style='background: url("https://placehold.co/600x200.png") 50% center / cover;'>
+                <button id="close-attchment" class="btn position-absolute border-0 end-0 p-0">
+                    <i class="bi bi-x-circle-fill"></i>
+                </button>
+            </span>
+        </div>
+        <div class="d-flex">
+            <textarea class="form-control border-0 position-relative"
+                style="resize: none; background-color: transparent;" id="prompt-text" autofocus
+                placeholder="Đặt câu hỏi"></textarea>
+            <div class="btn-group dropup align-items-center">
+                <style>
+                    .dropdown-menu button:active {
+                        background-color: var(--bs-tertiary-bg) !important;
+                        color: var(--bs-secondary-color);
+                    }
+
+                    .bi.bi-plus::before {
+                        font-weight: 600 !important;
+                    }
+                </style>
+                <span class="more-options-icon" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-plus text-body-secondary fs-5" style="font-weight: 700 !important;"></i>
+                </span>
+                <button class="btn border-0 p-0" type="submit" id="send-message">
+                    <span class="send-btn p-2"><i class="bi bi-send-fill text-body-secondary"></i></span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-lg-end bg-body-secondary">
+                    <li><button class="dropdown-item" type="button" id="file-choosen" onclick="fileChooser()">Chọn
+                            tệp</button></li>
+                    <li><button class="dropdown-item" type="button" id="voice-btn" title="Nhấp để bắt đầu ghi âm">
+                            <i class="bi bi-mic" id="voice-icon"></i>
+                            <span id="voice-text">Giọng nói</span>
+                        </button></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</form>
+
+<div class="modal fade" id="img-modal" tabindex="-1" aria-labelledby="exampleModalCenterTitle" aria-modal="true"
+    role="dialog" style="backdrop-filter: blur(18px);">
+    <div class="modal-dialog modal-dialog-centered container">
+        <div class="modal-content">
+            <img class="image-modal rounded-4" src="https://placehold.co/600x400" alt="">
+        </div>
+    </div>
+    <div class="position-absolute top-0 w-100 py-5 px-3 d-flex">
+        <button class="btn border-0 ">
+            <span><i class="bi bi-download fs-5"></i></span>
+        </button>
+        <button class="btn border-0 ">
+            <span><i class="bi bi-x-lg fs-5"></i></span>
+        </button>
+    </div>
+</div>
+
+<button type="button" class="btn btn-primary d-none" data-bs-toggle="modal" data-bs-target="#img-modal"></button>
+
+
+
+{% endblock %}

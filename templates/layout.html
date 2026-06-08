@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/stackoverflow-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/go.min.js"></script>
+</head>
+
+<body>
+    <header class="navbar navbar-expand-lg bd-navbar sticky-top bg-body-tertiary">
+        <nav class="container">
+            <a class="navbar-brand" style="height: 60px;" href="/">
+                <img src="static/images/ahihi-logo.png" width="100">
+                <span><i class="fw-bold" style="color: rgb(255, 110, 57);">NHÀ THÔNG MINH IOTs</i></span>
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText"
+                aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse me-0" id="navbarText">
+                <ul class="navbar-nav ms-auto my-2 my-lg-0 navbar-nav-scroll fw-bold gap-3">
+                    {% block nav_items %}{% endblock %}
+                    <li class="nav-item">
+                        <div class="checkbox-wrapper-5 mt-1">
+                            <div class="check">
+                                <input id="check-5" type="checkbox" checked>
+                                <label class="bi bi-brightness-high-fill" for="check-5"></label>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container mt-3">
+        {% block content %}{% endblock %}
+    </div>
+
+    <script src="{{ url_for('static', filename='voice-recognition.js') }}"></script>
+    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous">
+        </script>
+
+
+    <script>
+        async function refreshEspSensor() {
+
+            const tempEl = document.getElementById('esp-temp');
+            const humEl = document.getElementById('esp-hum');
+            const statusEl = document.getElementById('esp-status');
+
+            try {
+
+                const res = await fetch('/esp_sensor');
+
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status}`);
+                }
+
+                const data = await res.json();
+
+                tempEl.innerText =
+                    data.temperature != null
+                        ? `${data.temperature} °C`
+                        : '-- °C';
+
+                humEl.innerText =
+                    data.humidity != null
+                        ? `${data.humidity} %`
+                        : '-- %';
+
+                const now = new Date();
+
+                const dateTime = now.toLocaleString('vi-VN', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+
+                statusEl.innerHTML =
+                    data.temperature != null
+                        ? `🟢 ESP32 Online • Cập nhật: ${dateTime}`
+                        : '🟡 Không có dữ liệu cảm biến';
+
+            } catch (error) {
+
+                statusEl.innerHTML =
+                    '🔴 ESP32 Offline';
+
+                tempEl.innerText = '-- °C';
+                humEl.innerText = '-- %';
+
+                console.error(error);
+            }
+        }
+
+        setInterval(refreshEspSensor, 30000);
+        document.addEventListener('DOMContentLoaded', refreshEspSensor);
+    </script>
+
+</body>
+
+</html>

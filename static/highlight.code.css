@@ -1,0 +1,53 @@
+pre {
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    align-content: space-between;
+    /* position: relative; */
+    max-width: 90%;
+    min-width: 40%;
+    width: fit-content;
+}
+
+pre>nav.navbar {
+    padding: .5em 1em;
+    background-color: #252525;
+    color: #fff;
+    position: sticky;
+    top: 0;
+    left: 0;
+    width: 100%;
+    border-radius: 10px 10px 0 0;
+}
+
+pre .bi {
+    color: #fff;
+}
+
+pre>nav button {
+    margin-left: auto;
+    border: 0;
+}
+
+pre>code.hljs {
+    font-family: "Cascadia Code", "Fira Code", monospace;
+    padding: 20px 2.5em !important;
+    border-radius: 0 0 10px 10px;
+    font-size: .875em;
+    background-color: #10100e;
+}
+
+pre>.navbar .btn {
+    border-radius: 50%;
+    height: 40px;
+    width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    transition: ease .3s;
+}
+
+pre>.navbar .btn:hover {
+    background-color: #474747;
+}
