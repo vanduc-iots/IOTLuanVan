@@ -19,23 +19,29 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 const prompt = document.getElementById("prompt-text");
+
+function submitVoiceMessage() {
+    const message = prompt.value.trim();
+    if (!message) return;
+
+    let userAttachment = filesChoosen[0];
+    appendMessageBox(message, "user", userAttachment);
+    closeFileChoosen();
+    if (userAttachment) {
+        if (userAttachment.startsWith("data:"))
+            userAttachment = userAttachment.split(",")[1];
+        sendMessageReq(message, userAttachment);
+    } else {
+        sendMessageReq(message);
+    }
+
+    prompt.value = "";
+    sendMessageBtn.classList.remove("show-send-btn");
+}
+
 document.getElementById("form").addEventListener("submit", (e) => {
     e.preventDefault();
-    if (prompt.value != "") {
-        let userAttachment = filesChoosen[0];
-        appendMessageBox(prompt.value, "user", userAttachment);
-        closeFileChoosen();
-        if (userAttachment) {
-            if (userAttachment.startsWith("data:"))
-                userAttachment = userAttachment.split(",")[1];
-            sendMessageReq(prompt.value, userAttachment);
-        } else {
-            sendMessageReq(prompt.value);
-        }
-
-        prompt.value = "";
-    }
-    sendMessageBtn.classList.remove("show-send-btn");
+    submitVoiceMessage();
 });
 
 const sendMessageBtn = document.getElementById("form");
@@ -281,7 +287,7 @@ if (voiceBtn && voiceRecognition.isSupported) {
         if (result.isFinal && prompt.value && !voiceAutoSubmitting) {
             voiceAutoSubmitting = true;
             setTimeout(() => {
-                document.getElementById("send-message").click();
+                submitVoiceMessage();
             }, 300);
         }
     };
@@ -289,6 +295,11 @@ if (voiceBtn && voiceRecognition.isSupported) {
     voiceRecognition.onEnd = () => {
         console.log('Voice recognition ended');
         updateVoiceBtnUI(false);
+
+        if (prompt.value && !voiceAutoSubmitting) {
+            voiceAutoSubmitting = true;
+            submitVoiceMessage();
+        }
     };
     
     voiceRecognition.onError = (error) => {
