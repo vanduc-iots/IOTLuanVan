@@ -20,9 +20,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 const prompt = document.getElementById("prompt-text");
 
-function submitVoiceMessage() {
-    const message = prompt.value.trim();
-    console.log('[voice] submitVoiceMessage called. message=', message);
+function submitVoiceMessage(passedMessage = null) {
+    const message = (passedMessage || prompt.value || '').trim();
+    console.log('[voice] submitVoiceMessage called. message=', message, 'passedMessage=', passedMessage);
     if (!message) return;
 
     let userAttachment = filesChoosen[0];
@@ -318,6 +318,17 @@ if (voiceBtn && voiceRecognition.isSupported) {
         }
 
         setTimeout(() => {
+            if (!voiceAutoSubmitting) {
+                // prefer using finalTranscript directly
+                const finalText = (voiceRecognition.finalTranscript || '').trim();
+                if (finalText) {
+                    console.log('[voice] onEnd - submitting finalTranscript directly:', finalText);
+                    voiceAutoSubmitting = true;
+                    submitVoiceMessage(finalText);
+                    return;
+                }
+            }
+
             if (prompt.value && !voiceAutoSubmitting) {
                 voiceAutoSubmitting = true;
                 submitVoiceMessage();
