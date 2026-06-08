@@ -23,9 +23,9 @@ const voiceResponseToggle = document.getElementById("voice-response-toggle");
 const voiceResponseStatus = document.getElementById("voice-response-status");
 const isSpeechSupported = typeof window !== 'undefined' && 'speechSynthesis' in window;
 const speechSynth = isSpeechSupported ? window.speechSynthesis : null;
-// Configuration flag: set to true to allow server-side TTS fallback (may incur OpenAI costs)
-// Change to `true` only if you accept server API usage charges.
-const USE_SERVER_TTS = false;
+// Configuration flag read from server (window.appConfig.useServerTTS)
+// Default to false (no server TTS) to avoid OpenAI costs
+const USE_SERVER_TTS = window.appConfig && window.appConfig.useServerTTS ? window.appConfig.useServerTTS : false;
 let voiceResponseEnabled = isSpeechSupported && (localStorage.getItem('voiceResponseEnabled') !== 'false');
 let speechVoices = [];
 let hasVietnameseVoice = false;

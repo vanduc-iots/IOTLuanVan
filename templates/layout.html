@@ -47,6 +47,13 @@
         {% block content %}{% endblock %}
     </div>
 
+    <script>
+        // Configuration loaded from server
+        window.appConfig = {
+            useServerTTS: {{ 'true' if use_server_tts else 'false' }}
+        };
+    </script>
+
     <script src="{{ url_for('static', filename='voice-recognition.js') }}?v=20260608"></script>
     <script src="{{ url_for('static', filename='scripts.js') }}?v=20260608"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"

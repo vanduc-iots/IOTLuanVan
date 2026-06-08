@@ -1,4 +1,5 @@
 import base64
+import os
 from flask import Flask, request, jsonify, render_template, redirect
 from app import generate_Content
 from app.services.call_esp8266 import light_control, get_sensor_data, get_status as get_esp_status
@@ -8,16 +9,19 @@ from setup import OPENAI_API_KEY
 
 _app = Flask(__name__)
 _app.logger.setLevel(logging.INFO)
+
+# Configuration for server-side TTS (default: False to avoid OpenAI costs)
+USE_SERVER_TTS = os.getenv('USE_SERVER_TTS', 'false').lower() in ('true', '1', 'yes')
 _app.template_folder = "templates"
 _app.static_folder = "static"
 
 @_app.route("/", methods = ["GET"])
 def home():
-    return render_template("home.html")
+    return render_template("home.html", use_server_tts=USE_SERVER_TTS)
 
 @_app.route("/introduction", methods = ["GET"])
 def introduction():
-    return render_template("introduction.html")
+    return render_template("introduction.html", use_server_tts=USE_SERVER_TTS)
 
 @_app.route("/esp_sensor", methods=["GET"])
 def esp_sensor():
