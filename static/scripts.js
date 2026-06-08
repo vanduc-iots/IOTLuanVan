@@ -25,11 +25,14 @@ const isSpeechSupported = typeof window !== 'undefined' && 'speechSynthesis' in 
 const speechSynth = isSpeechSupported ? window.speechSynthesis : null;
 let voiceResponseEnabled = isSpeechSupported && (localStorage.getItem('voiceResponseEnabled') !== 'false');
 let speechVoices = [];
+let hasVietnameseVoice = false;
 
 function loadSpeechVoices() {
     if (!speechSynth) return;
-    // Only keep Vietnamese voices
-    speechVoices = speechSynth.getVoices().filter(v => v.lang && v.lang.toLowerCase().startsWith('vi'));
+    const voices = speechSynth.getVoices();
+    speechVoices = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith('vi'));
+    hasVietnameseVoice = speechVoices.length > 0;
+    console.log('[speech] voices loaded', voices.map(v => ({name: v.name, lang: v.lang})), 'hasVietnameseVoice=', hasVietnameseVoice);
 }
 
 function selectSpeechVoice() {
@@ -46,22 +49,57 @@ function updateVoiceResponseToggleUI() {
     voiceResponseToggle.title = voiceResponseEnabled ? 'Tắt phản hồi giọng nói' : 'Bật phản hồi giọng nói';
 }
 
-function speakText(text) {
-    if (!speechSynth || !voiceResponseEnabled || !text) return;
+async function speakText(text) {
+    if (!voiceResponseEnabled || !text) return;
     const message = text
         .replace(/<[^>]*>/g, '')
         .replace(/!\[[^\]]*\]\([^\)]*\)/g, '')
         .replace(/\s+/g, ' ')
         .trim();
     if (!message) return;
-    speechSynth.cancel();
-    const utterance = new SpeechSynthesisUtterance(message);
-    utterance.lang = 'vi-VN';
-    utterance.rate = 1;
-    utterance.pitch = 1;
-    const voice = selectSpeechVoice();
-    if (voice && voice.lang && voice.lang.toLowerCase().startsWith('vi')) utterance.voice = voice;
-    speechSynth.speak(utterance);
+
+    if (speechSynth && hasVietnameseVoice) {
+        speechSynth.cancel();
+        const utterance = new SpeechSynthesisUtterance(message);
+        utterance.lang = 'vi-VN';
+        utterance.rate = 1;
+        utterance.pitch = 1;
+        const voice = selectSpeechVoice();
+        if (voice && voice.lang && voice.lang.toLowerCase().startsWith('vi')) {
+            utterance.voice = voice;
+        }
+        speechSynth.speak(utterance);
+        return;
+    }
+
+    console.warn('[speech] Vietnamese native voice not available, using fallback TTS');
+    await speakTextFallback(message);
+}
+
+async function speakTextFallback(text) {
+    try {
+        const response = await fetch('/tts', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ text })
+        });
+        if (!response.ok) {
+            console.error('[speech] fallback TTS failed', response.status, await response.text());
+            return;
+        }
+        const data = await response.json();
+        if (!data.audio) {
+            console.error('[speech] fallback TTS response missing audio');
+            return;
+        }
+        const audio = new Audio(`data:audio/mp3;base64,${data.audio}`);
+        audio.play().catch(err => console.error('[speech] audio playback failed', err));
+    } catch (err) {
+        console.error('[speech] speakTextFallback error', err);
+    }
 }
 
 if (speechSynth) {
