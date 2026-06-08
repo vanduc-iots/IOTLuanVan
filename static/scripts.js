@@ -35,7 +35,11 @@ function updateVoiceResponseToggleUI() {
 
 function speakText(text) {
     if (!isSpeechSupported || !voiceResponseEnabled || !text) return;
-    const message = text.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+    const message = text
+        .replace(/<[^>]*>/g, '')
+        .replace(/!\[[^\]]*\]\([^\)]*\)/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
     if (!message) return;
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(message);
@@ -45,16 +49,32 @@ function speakText(text) {
     window.speechSynthesis.speak(utterance);
 }
 
+function getLastBotResponseText() {
+    const botBoxes = document.querySelectorAll('.model-box');
+    if (!botBoxes.length) return '';
+    return botBoxes[botBoxes.length - 1].textContent.trim();
+}
+
 if (voiceResponseToggle) {
     if (!isSpeechSupported) {
         voiceResponseToggle.disabled = true;
-        voiceResponseStatus.textContent = 'Không hỗ trợ';
+        if (voiceResponseStatus) {
+            voiceResponseStatus.textContent = 'Không hỗ trợ';
+        }
         voiceResponseToggle.title = 'Trình duyệt không hỗ trợ phát giọng nói';
     } else {
         voiceResponseToggle.addEventListener('click', () => {
             voiceResponseEnabled = !voiceResponseEnabled;
             localStorage.setItem('voiceResponseEnabled', voiceResponseEnabled ? 'true' : 'false');
             updateVoiceResponseToggleUI();
+            if (voiceResponseEnabled) {
+                const lastBotResponse = getLastBotResponseText();
+                if (lastBotResponse) {
+                    speakText(lastBotResponse);
+                }
+            } else {
+                window.speechSynthesis.cancel();
+            }
         });
     }
 }
@@ -221,7 +241,10 @@ function sendMessageReq(userMessage, userAttachment) {
                     model_message += "\n\n" + `![](${data.model.image})`;
 
                 botWriteText(model_message);
-                speakText(data.model.message || model_message);
+                const textToSpeak = (data.model.message || model_message)
+                    .replace(/!\[[^\]]*\]\([^\)]*\)/g, '')
+                    .trim();
+                speakText(textToSpeak);
                 window.scrollTo(0, document.body.scrollHeight);
             }
         });
