@@ -305,10 +305,25 @@ if (voiceBtn && voiceRecognition.isSupported) {
         console.log('Voice recognition ended');
         updateVoiceBtnUI(false);
 
-        if (prompt.value && !voiceAutoSubmitting) {
-            voiceAutoSubmitting = true;
-            setTimeout(() => submitVoiceMessage(), 200);
+        // If prompt is empty, try to use the recognition instance finalTranscript
+        try {
+            const finalText = (voiceRecognition.finalTranscript || '').trim();
+            if (!prompt.value && finalText) {
+                console.log('[voice] onEnd - applying finalTranscript to prompt:', finalText);
+                prompt.value = finalText;
+            }
+        } catch (err) {
+            console.warn('[voice] onEnd - unable to read finalTranscript', err);
         }
+
+        setTimeout(() => {
+            if (prompt.value && !voiceAutoSubmitting) {
+                voiceAutoSubmitting = true;
+                submitVoiceMessage();
+            } else {
+                console.log('[voice] onEnd - nothing to submit or already submitting', { value: prompt.value, autoSubmitting: voiceAutoSubmitting });
+            }
+        }, 100);
     };
     
     voiceRecognition.onError = (error) => {
