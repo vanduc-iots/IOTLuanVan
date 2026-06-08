@@ -22,18 +22,32 @@ const prompt = document.getElementById("prompt-text");
 
 function submitVoiceMessage() {
     const message = prompt.value.trim();
+    console.log('[voice] submitVoiceMessage called. message=', message);
     if (!message) return;
 
     let userAttachment = filesChoosen[0];
     appendMessageBox(message, "user", userAttachment);
     closeFileChoosen();
-    if (userAttachment) {
-        if (userAttachment.startsWith("data:"))
-            userAttachment = userAttachment.split(",")[1];
-        sendMessageReq(message, userAttachment);
-    } else {
-        sendMessageReq(message);
+    try {
+        if (userAttachment) {
+            if (userAttachment.startsWith("data:"))
+                userAttachment = userAttachment.split(",")[1];
+            sendMessageReq(message, userAttachment);
+        } else {
+            sendMessageReq(message);
+        }
+    } catch (err) {
+        console.error('[voice] sendMessageReq failed', err);
     }
+
+    // fallback: ensure the form submit/button click happens if direct call doesn't work
+    setTimeout(() => {
+        const sendBtn = document.getElementById('send-message');
+        if (sendBtn) {
+            console.log('[voice] fallback: clicking send button');
+            sendBtn.click();
+        }
+    }, 150);
 
     prompt.value = "";
     sendMessageBtn.classList.remove("show-send-btn");
