@@ -1,12 +1,13 @@
 import base64
+import os
 from flask import Flask, request, jsonify, render_template, redirect
 from app import generate_Content
 from app.services.call_esp8266 import light_control, get_sensor_data, get_status as get_esp_status
 import logging
-import os
 import openai
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+USE_SERVER_TTS = os.getenv('USE_SERVER_TTS', 'false').lower() in ('true', '1', 'yes')
 
 app = Flask(__name__)
 app.logger.setLevel(logging.INFO)
@@ -15,11 +16,11 @@ app.static_folder = os.path.join(os.path.dirname(__file__), "../static")
 
 @app.route("/", methods=["GET"])
 def home():
-    return render_template("home.html")
+    return render_template("home.html", use_server_tts=USE_SERVER_TTS)
 
 @app.route("/introduction", methods=["GET"])
 def introduction():
-    return render_template("introduction.html")
+    return render_template("introduction.html", use_server_tts=USE_SERVER_TTS)
 
 @app.route("/esp_sensor", methods=["GET"])
 def esp_sensor():
@@ -36,6 +37,9 @@ def ttsController():
     text = data.get("text", "").strip()
     if not text:
         return jsonify({"error": "Text is required"}), 400
+
+    if not USE_SERVER_TTS:
+        return jsonify({"error": "Server-side TTS is disabled"}), 403
 
     if not OPENAI_API_KEY:
         return jsonify({"error": "OPENAI_API_KEY is not set"}), 500

@@ -61,21 +61,21 @@ async function speakText(text) {
         .trim();
     if (!message) return;
 
-    if (speechSynth && hasVietnameseVoice) {
+    if (speechSynth) {
         speechSynth.cancel();
         const utterance = new SpeechSynthesisUtterance(message);
         utterance.lang = 'vi-VN';
         utterance.rate = 1;
         utterance.pitch = 1;
-        const voice = selectSpeechVoice();
-        if (voice && voice.lang && voice.lang.toLowerCase().startsWith('vi')) {
+        const voice = selectSpeechVoice() || speechSynth.getVoices()[0] || null;
+        if (voice) {
             utterance.voice = voice;
         }
         speechSynth.speak(utterance);
         return;
     }
 
-    console.warn('[speech] Vietnamese native voice not available, using fallback TTS');
+    console.warn('[speech] native speech synthesis not available, using fallback TTS');
     await speakTextFallback(message);
 }
 
