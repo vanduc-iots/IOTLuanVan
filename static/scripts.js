@@ -19,6 +19,45 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 const prompt = document.getElementById("prompt-text");
+const voiceResponseToggle = document.getElementById("voice-response-toggle");
+const voiceResponseStatus = document.getElementById("voice-response-status");
+const isSpeechSupported = typeof window !== 'undefined' && 'speechSynthesis' in window;
+let voiceResponseEnabled = isSpeechSupported && (localStorage.getItem('voiceResponseEnabled') !== 'false');
+
+function updateVoiceResponseToggleUI() {
+    if (!voiceResponseToggle || !voiceResponseStatus) return;
+    voiceResponseStatus.textContent = voiceResponseEnabled ? 'Bật' : 'Tắt';
+    voiceResponseToggle.classList.toggle('active', voiceResponseEnabled);
+    voiceResponseToggle.title = voiceResponseEnabled ? 'Tắt phản hồi giọng nói' : 'Bật phản hồi giọng nói';
+}
+
+function speakText(text) {
+    if (!isSpeechSupported || !voiceResponseEnabled || !text) return;
+    const message = text.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+    if (!message) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(message);
+    utterance.lang = 'vi-VN';
+    utterance.rate = 1;
+    utterance.pitch = 1;
+    window.speechSynthesis.speak(utterance);
+}
+
+if (voiceResponseToggle) {
+    if (!isSpeechSupported) {
+        voiceResponseToggle.disabled = true;
+        voiceResponseStatus.textContent = 'Không hỗ trợ';
+        voiceResponseToggle.title = 'Trình duyệt không hỗ trợ phát giọng nói';
+    } else {
+        voiceResponseToggle.addEventListener('click', () => {
+            voiceResponseEnabled = !voiceResponseEnabled;
+            localStorage.setItem('voiceResponseEnabled', voiceResponseEnabled ? 'true' : 'false');
+            updateVoiceResponseToggleUI();
+        });
+    }
+}
+
+updateVoiceResponseToggleUI();
 
 function submitVoiceMessage(passedMessage = null) {
     const message = (passedMessage || prompt.value || '').trim();
@@ -180,6 +219,7 @@ function sendMessageReq(userMessage, userAttachment) {
                     model_message += "\n\n" + `![](${data.model.image})`;
 
                 botWriteText(model_message);
+                speakText(data.model.message || model_message);
                 window.scrollTo(0, document.body.scrollHeight);
             }
         });
