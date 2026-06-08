@@ -43,14 +43,13 @@ function submitVoiceMessage(passedMessage = null) {
     // fallback: ensure the form submit/button click happens if direct call doesn't work
     setTimeout(() => {
         const sendBtn = document.getElementById('send-message');
-        if (sendBtn) {
+        if (sendBtn && prompt.value) {
             console.log('[voice] fallback: clicking send button');
             sendBtn.click();
         }
+        prompt.value = "";
+        sendMessageBtn.classList.remove("show-send-btn");
     }, 150);
-
-    prompt.value = "";
-    sendMessageBtn.classList.remove("show-send-btn");
 }
 
 document.getElementById("form").addEventListener("submit", (e) => {
