@@ -33,14 +33,21 @@ let hasVietnameseVoice = false;
 function loadSpeechVoices() {
     if (!speechSynth) return;
     const voices = speechSynth.getVoices();
-    speechVoices = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith('vi'));
+    speechVoices = voices.filter(v => {
+        const lang = String(v.lang || '').toLowerCase();
+        const name = String(v.name || '').toLowerCase();
+        return lang.startsWith('vi') || name.includes('vietnamese');
+    });
     hasVietnameseVoice = speechVoices.length > 0;
     console.log('[speech] voices loaded', voices.map(v => ({name: v.name, lang: v.lang})), 'hasVietnameseVoice=', hasVietnameseVoice);
+    if (!hasVietnameseVoice) {
+        console.warn('[speech] no Vietnamese voice found in browser. Install a Vietnamese voice pack or use a browser/OS with vi-VN voices.');
+    }
 }
 
 function selectSpeechVoice() {
     if (!speechVoices.length) return null;
-    return speechVoices.find(v => v.lang.toLowerCase().startsWith('vi')) || null;
+    return speechVoices.find(v => String(v.lang || '').toLowerCase().startsWith('vi')) || speechVoices[0] || null;
 }
 
 function updateVoiceResponseToggleUI() {
@@ -61,17 +68,22 @@ async function speakText(text) {
         .trim();
     if (!message) return;
 
-    if (speechSynth) {
+    if (speechSynth && hasVietnameseVoice) {
         speechSynth.cancel();
         const utterance = new SpeechSynthesisUtterance(message);
         utterance.lang = 'vi-VN';
         utterance.rate = 1;
         utterance.pitch = 1;
-        const voice = selectSpeechVoice() || speechSynth.getVoices()[0] || null;
+        const voice = selectSpeechVoice();
         if (voice) {
             utterance.voice = voice;
         }
         speechSynth.speak(utterance);
+        return;
+    }
+
+    if (speechSynth && !hasVietnameseVoice) {
+        console.warn('[speech] browser supports speech synthesis but no Vietnamese voice is installed. Free Vietnamese TTS not available.');
         return;
     }
 
