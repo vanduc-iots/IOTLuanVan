@@ -36,7 +36,10 @@ function loadSpeechVoices() {
     speechVoices = voices.filter(v => {
         const lang = String(v.lang || '').toLowerCase();
         const name = String(v.name || '').toLowerCase();
-        return lang.startsWith('vi') || name.includes('vietnamese');
+        return lang.includes('vi')
+            || name.includes('viet')
+            || name.includes('việt')
+            || name.includes('vietnamese');
     });
     hasVietnameseVoice = speechVoices.length > 0;
     console.log('[speech] voices loaded', voices.map(v => ({name: v.name, lang: v.lang})), 'hasVietnameseVoice=', hasVietnameseVoice);
@@ -47,7 +50,9 @@ function loadSpeechVoices() {
 
 function selectSpeechVoice() {
     if (!speechVoices.length) return null;
-    return speechVoices.find(v => String(v.lang || '').toLowerCase().startsWith('vi')) || speechVoices[0] || null;
+    return speechVoices.find(v => String(v.lang || '').toLowerCase().includes('vi'))
+        || speechVoices[0]
+        || null;
 }
 
 function updateVoiceResponseToggleUI() {

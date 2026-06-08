@@ -68,6 +68,10 @@
             const humEl = document.getElementById('esp-hum');
             const statusEl = document.getElementById('esp-status');
 
+            if (!tempEl || !humEl || !statusEl) {
+                return;
+            }
+
             try {
 
                 const res = await fetch('/esp_sensor');
