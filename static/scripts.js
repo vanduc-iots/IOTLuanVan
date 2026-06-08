@@ -25,8 +25,10 @@ const isSpeechSupported = typeof window !== 'undefined' && 'speechSynthesis' in 
 let voiceResponseEnabled = isSpeechSupported && (localStorage.getItem('voiceResponseEnabled') !== 'false');
 
 function updateVoiceResponseToggleUI() {
-    if (!voiceResponseToggle || !voiceResponseStatus) return;
-    voiceResponseStatus.textContent = voiceResponseEnabled ? 'Bật' : 'Tắt';
+    if (!voiceResponseToggle) return;
+    if (voiceResponseStatus) {
+        voiceResponseStatus.textContent = voiceResponseEnabled ? 'Bật' : 'Tắt';
+    }
     voiceResponseToggle.classList.toggle('active', voiceResponseEnabled);
     voiceResponseToggle.title = voiceResponseEnabled ? 'Tắt phản hồi giọng nói' : 'Bật phản hồi giọng nói';
 }
