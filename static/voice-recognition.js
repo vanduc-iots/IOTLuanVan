@@ -87,7 +87,12 @@ class VoiceRecognition {
     }
     
     setLanguage(lang) {
-        this.recognition.language = lang;
+        // Only allow setting Vietnamese language; otherwise keep default vi-VN
+        if (lang && lang.toLowerCase().startsWith('vi')) {
+            this.recognition.language = lang;
+        } else {
+            this.recognition.language = 'vi-VN';
+        }
     }
     
     getErrorMessage(errorCode) {

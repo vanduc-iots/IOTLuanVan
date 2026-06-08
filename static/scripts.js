@@ -28,12 +28,13 @@ let speechVoices = [];
 
 function loadSpeechVoices() {
     if (!speechSynth) return;
-    speechVoices = speechSynth.getVoices().filter(v => v.lang.toLowerCase().startsWith('vi') || v.lang.toLowerCase().startsWith('en'));
+    // Only keep Vietnamese voices
+    speechVoices = speechSynth.getVoices().filter(v => v.lang && v.lang.toLowerCase().startsWith('vi'));
 }
 
 function selectSpeechVoice() {
     if (!speechVoices.length) return null;
-    return speechVoices.find(v => v.lang.toLowerCase().startsWith('vi')) || speechVoices[0];
+    return speechVoices.find(v => v.lang.toLowerCase().startsWith('vi')) || null;
 }
 
 function updateVoiceResponseToggleUI() {
@@ -59,7 +60,7 @@ function speakText(text) {
     utterance.rate = 1;
     utterance.pitch = 1;
     const voice = selectSpeechVoice();
-    if (voice) utterance.voice = voice;
+    if (voice && voice.lang && voice.lang.toLowerCase().startsWith('vi')) utterance.voice = voice;
     speechSynth.speak(utterance);
 }
 
